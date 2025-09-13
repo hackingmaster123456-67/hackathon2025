@@ -1,0 +1,88 @@
+"""
+Hackathon Project: Generative AI Story & ASCII Art Maker
+--------------------------------------------------------
+Copy this file into your repo and run:
+
+    python script.py
+
+No external files needed.
+"""
+
+import random
+import re
+from datetime import datetime
+
+# --------------------------------
+# Utilities
+# --------------------------------
+
+def generate_story(prompt: str, length: int = 300) -> str:
+    """Generate a pseudo-random story based on the prompt."""
+    words = prompt.split()
+    story = words[:]
+    # Add random word chains
+    for _ in range(length):
+        if random.random() < 0.2:
+            story.append(random.choice(words).capitalize())
+        else:
+            story.append(random.choice(words))
+        if random.random() < 0.05:
+            story.append(".")
+    text = " ".join(story)
+    # Clean formatting
+    text = re.sub(r"\s+\.", ".", text)
+    text = re.sub(r"\s{2,}", " ", text)
+    return text.capitalize() + "."
+
+def generate_ascii_art(title: str) -> str:
+    """Create simple ASCII art banner for the story."""
+    banner = f"*** {title.upper()} ***"
+    border = "*" * len(banner)
+    art = f"{border}\n{banner}\n{border}\n"
+    # Add some shapes
+    art += "\n".join([
+        "      /\\",
+        "     /  \\   _",
+        "    / /\\ \\ (_)",
+        "   / ____ \\",
+        "  /_/    \\_\\"
+    ])
+    return art
+
+def extract_keywords(text: str, n=5):
+    """Get top repeated words for 'insights'."""
+    words = re.findall(r"\w+", text.lower())
+    freq = {}
+    for w in words:
+        if len(w) > 3:
+            freq[w] = freq.get(w, 0) + 1
+    top = sorted(freq.items(), key=lambda x: x[1], reverse=True)[:n]
+    return [w for w,_ in top]
+
+# --------------------------------
+# Main Program
+# --------------------------------
+if __name__ == "__main__":
+    print("🤖 Generative AI Story & ASCII Art Maker 🤖")
+    prompt = input("Enter a theme or prompt for your story: ")
+    if not prompt.strip():
+        prompt = "robots exploring space galaxies"
+
+    # Generate content
+    story = generate_story(prompt, length=200)
+    art = generate_ascii_art(prompt[:20])
+    keywords = extract_keywords(story)
+
+    # Print to screen
+    print("\n" + art)
+    print("\n📖 STORY:\n")
+    print(story)
+    print("\n🔑 KEY INSIGHTS:", ", ".join(keywords))
+
+    # Save to file
+    filename = f"project_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(art + "\n\n")
+        f.write("📖 STORY:\n\n" + story + "\n\n")
+        f.write("🔑 KEY INSIGHTS: " + ", ".join(keywords) + "\n")
+    print(f"\n✅ Saved report to {filename}")
